@@ -1,0 +1,63 @@
+#Create Google Storage Bucket
+gsutil mb -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+gsutil mb gs://<BUCKET_NAME>
+
+#Copy Data to Google Bucket
+gsutil cp [MY_FILE] gs://[BUCKET_NAME]
+gsutil cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+gsutil cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+
+#Check Versioning status
+gsutil versioning get gs://$BUCKET_NAME_1
+
+#Activate Versioning
+gsutil versioning set on gs://$BUCKET_NAME_1
+
+#Change ACL to file to become accessible from outside
+gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+
+#Set Private the object
+gsutil acl set private gs://$BUCKET_NAME_1/setup.html
+
+#Set all to public for the object
+gsutil acl ch -u AllUsers:R gs://$BUCKET_NAME_1/setup.html
+
+#Create Customer Supplied Encryption Keys
+python3 -c 'import base64; import os; print(base64.encodebytes(os.urandom(32)))'
+ls -al
+nano .boto
+gsutil config -n (BIla masih belum muncul)
+
+gsutil ls -a gs://$BUCKET_NAME_1/setup.html
+Sync BUcket
+mkdir firstlevel
+mkdir ./firstlevel/secondlevel
+cp setup.html firstlevel
+cp setup.html firstlevel/secondlevel
+
+gsutil rsync -r ./firstlevel gs://$BUCKET_NAME_1/firstlevel
+
+#Create BUucket LifeCycle Lifecycle
+gsutil lifecycle get gs://$BUCKET_NAME_1
+nano life.json
+
+{
+  "rule":
+  [
+    {
+      "action": {"type": "Delete"},
+      "condition": {"age": 31}
+    }
+  ]
+}
+
+gsutil lifecycle set life.json gs://$BUCKET_NAME_1
+gsutil lifecycle get gs://$BUCKET_NAME_1
+
+#Export access list from the object
+gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl.txt
+cat acl.txt
+
+#Publish to Internet
+gsutil acl ch -u AllUsers:R gs://$YOUR_BUCKET/cdn.png
+gsutil acl ch -u AllUsers:R gs://$YOUR_BUCKET/regions.png

@@ -21,8 +21,38 @@ gcloud compute instances create www1 \
     sudo service apache2 restart
     echo '<!doctype html><html><body><h1>www1</h1></body></html>' | tee /var/www/html/index.html"
 
+#Access VM Through IAP Tunnel
+gcloud compute ssh <<VM Name>> --zone us-central1-c --tunnel-through-iap
+Note: Create Firewall Rule to allow trafic from IP Private : 35.235.240.0/20
+
 #Connect VM through SSH
 gcloud compute ssh gcelab2 
+
+#Create VM Instance Template
+gcloud compute instance-templates create lb-backend-template \
+   --region=us-central1 \
+   --network=default \
+   --subnet=default \
+   --tags=allow-health-check \
+   --image-family=debian-9 \
+   --image-project=debian-cloud \
+   --metadata=startup-script='#! /bin/bash
+     apt-get update
+     apt-get install apache2 -y
+     a2ensite default-ssl
+     a2enmod ssl
+     vm_hostname="$(curl -H "Metadata-Flavor:Google" \
+     http://169.254.169.254/computeMetadata/v1/instance/name)"
+     echo "Page served from: $vm_hostname" | \
+     tee /var/www/html/index.html
+     systemctl restart apache2'
+
+#Find Existing External IP Address
+curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip && echo
+
+#Deploy VM from Instance Template
+gcloud compute instance-groups managed create lb-backend-group \
+   --template=lb-backend-template --size=2 --zone=us-central1-a
 
 
 

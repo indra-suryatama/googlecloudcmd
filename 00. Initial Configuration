@@ -27,3 +27,15 @@ Gcloud config list
 
 #See all zone status and an be filter by grep command
 gcloud compute zones list | grep us-central1
+
+#Show all Project ID List
+gcloud config list project
+
+#Define Parameter
+export LOCATION=ASIA
+export PROJECT=$(gcloud info --format='value(config.project)')
+
+To edit standard environment can change the .profile file
+And using source command to get the data
+
+

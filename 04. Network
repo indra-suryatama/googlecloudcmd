@@ -1,0 +1,51 @@
+#Create VPC
+gcloud compute networks create privatenet --subnet-mode=custom
+gcloud compute networks subnets create privatesubnet-us --network=privatenet --region=us-central1 --range=172.16.0.0/24
+gcloud compute networks subnets list --sort-by=NETWORK
+
+#Create Firewall
+gcloud compute firewall-rules create www-firewall-network-lb \
+    --target-tags network-lb-tag --allow tcp:80
+
+gcloud compute firewall-rules create privatenet-allow-icmp-ssh-rdp \
+--direction=INGRESS --priority=1000 --network=privatenet --action=ALLOW --rules=icmp,tcp:22,tcp:3389 --source-ranges=0.0.0.0/0
+
+#Create External ip
+gcloud compute addresses create network-lb-ip-1 \
+ --region us-central1
+
+#Create HTTP Health Check
+gcloud compute http-health-checks create basic-check
+
+#Load Balancer Configuration
+gcloud compute target-pools create www-pool \
+    --region us-central1 --http-health-check basic-check
+
+gcloud compute target-pools add-instances www-pool \
+    --instances www1,www2,www3 \
+    --instances-zone us-central1-a
+
+gcloud compute forwarding-rules create www-pool --address=34.68.185.39 --network-tier=PREMIUM --ip-protocol=TCP --ports=80 --target-pool=www-pool
+
+#Sendding Traffic to Instances
+while true; do curl -m1 IP_ADDRESS; done
+
+#To check web server response using command line
+curl http://my-vm-1/
+
+#Load Balancer Configuration
+gcloud compute target-pools create www-pool \
+    --region us-central1 --http-health-check basic-check
+
+gcloud compute target-pools add-instances www-pool \
+    --instances www1,www2,www3 \
+    --instances-zone us-central1-a
+
+gcloud compute forwarding-rules create www-pool --address=34.68.185.39 --network-tier=PREMIUM --ip-protocol=TCP --ports=80 --target-pool=www-pool
+
+
+#Sendding Traffic to Instances
+while true; do curl -m1 IP_ADDRESS; done
+
+#To check web server response using command line
+curl http://my-vm-1/

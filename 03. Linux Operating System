@@ -1,0 +1,52 @@
+# Perform Linux VM Resource Checking
+Free
+sudo dmidecode -t 17
+Nproc.
+Lscpu
+
+#Linux command to replace parameter 
+sed -i -e "s/PROJECT_ID/$DEVSHELL_PROJECT_ID/" mydeploy.yaml
+sed -i -e "s/ZONE/$MY_ZONE/" mydeploy.yaml.
+
+#Create Mounting Point
+sudo mkdir -p /home/minecraft
+
+#Extract file from targz
+Tar  -zxvf filename.tar.gz
+
+#Format Harddisk
+sudo mkfs.ext4 -F -E lazy_itable_init=0,\
+lazy_journal_init=0,discard \
+/dev/disk/by-id/google-minecraft-disk
+
+#attached Mount Point
+sudo mount -o discard,defaults /dev/disk/by-id/google-minecraft-disk /home/minecraft
+
+#Create startup (Running apache in startup)
+sudo update-rc.d apache2 enable
+
+#Copy from GCP to VM named first.vm
+gcloud compute scp index.html first-vm:index.nginx-debian.html --zone=us-central1-c
+
+#Create Backup Script
+cd /home/minecraft
+sudo nano /home/minecraft/backup.sh
+#!/bin/bash
+screen -r mcs -X stuff '/save-all\n/save-off\n'
+/usr/bin/gsutil cp -R ${BASH_SOURCE%/*}/world gs://${YOUR_BUCKET_NAME}-minecraft-backup/$(date "+%Y%m%d-%H%M%S")-world
+screen -r mcs -X stuff '/save-on\n'
+
+sudo chmod 755 /home/minecraft/backup.sh
+. /home/minecraft/backup.sh
+
+sudo crontab -e
+0 */4 * * * /home/minecraft/backup.sh  // Backup every 4 hour
+
+
+#Create Soft Link 
+ln -s ~/training-data-analyst/blogs/microservices-demo-1 ~/microservices-demo-1
+
+# Perform Stres test using apache
+ab -n 500000 -c 1000 http://$LB_IP/
+Create a Workload Generator in Linux
+dd if=/dev/urandom | gzip -9 >> /dev/null &
