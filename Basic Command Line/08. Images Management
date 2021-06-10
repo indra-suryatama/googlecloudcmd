@@ -1,0 +1,3 @@
+
+#Upload Images from GCS
+cloud compute --project=argolisfirstproject images import windows10payg --os=windows-2016 --source-file=gs://argolisfirstproject/WinDev2104Eval-disk1.vmdk --network=isvpc --subnet=jakarta

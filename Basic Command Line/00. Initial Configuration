@@ -1,3 +1,8 @@
+gcloud config set project argolisfirstproject
+gcloud config set compute/zone asia-southeast2-b
+gcloud config set compute/region asia-southeast2
+gcloud beta interactive
+
 #SET PARAMETER
 #Set Project ID
 gcloud config set project <<Namer Project ID>>
