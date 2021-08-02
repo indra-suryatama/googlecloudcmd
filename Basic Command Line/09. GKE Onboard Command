@@ -1,0 +1,107 @@
+1. Enviroment Setup
+
+gcloud auth list
+//gcloud projects list
+gcloud config list project
+gcloud config set project cloudonboard-gke
+
+
+
+echo $GOOGLE_CLOUD_PROJECT
+gcloud config set compute/zone asia-southeast2-b
+
+
+2. Clone Repository
+
+cd ~
+git clone https://github.com/googlecodelabs/monolith-to-microservices.git
+cd ~/monolith-to-microservices
+./setup.sh   #Need to discuss to node.js expertise about the requirement needs
+
+
+3. Create GKE CLuster
+gcloud services enable container.googleapis.com
+gcloud container clusters create fancy-cluster --num-nodes 3 --network default --subnetwork jakarta-region
+
+gcloud compute instances list
+gcloud container clusters get-credentials fancy-cluster
+
+4. Deploy monolith
+cd ~/monolith-to-microservices
+./deploy-monolith.sh
+
+kubectl get service monolith
+
+#check di workloads, cek ip , lalu tunjukan aplikasi bisa diakses
+
+5. Migrate Orders to microservices
+cd ~/monolith-to-microservices/microservices/src/orders
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/orders:1.0.0 .
+
+kubectl create deployment orders --image=gcr.io/${GOOGLE_CLOUD_PROJECT}/orders:1.0.0
+kubectl get all
+
+#Check WOrkloads, and inform the deployment can be perform via gui s well
+
+kubectl expose deployment orders --type=LoadBalancer --port 80 --target-port 8081
+kubectl get service
+
+
+cd ~/monolith-to-microservices/react-app
+nano .env.monolith
+#Or edit using text
+
+REACT_APP_ORDERS_URL=http://<ORDERS_IP_ADDRESS>/api/orders
+REACT_APP_PRODUCTS_URL=/service/products
+
+cd ~/monolith-to-microservices/react-app
+npm run build:monolith
+
+cd ~/monolith-to-microservices/monolith
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/monolith:2.0.0 .
+
+kubectl set image deployment/monolith monolith=gcr.io/${GOOGLE_CLOUD_PROJECT}/monolith:2.0.0
+
+#cek akses
+
+5. Migrate Products to microservices
+
+cd ~/monolith-to-microservices/microservices/src/products
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/products:1.0.0 .
+kubectl create deployment products --image=gcr.io/${GOOGLE_CLOUD_PROJECT}/products:1.0.0
+kubectl expose deployment products --type=LoadBalancer --port 80 --target-port 8082
+
+#Ubah enviroment variable
+REACT_APP_ORDERS_URL=http://<ORDERS_IP_ADDRESS>/api/orders
+REACT_APP_PRODUCTS_URL=http://<PRODUCTS_IP_ADDRESS>/api/products
+
+cd ~/monolith-to-microservices/react-app
+npm run build:monolith
+
+cd ~/monolith-to-microservices/monolith
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/monolith:3.0.1 .
+
+kubectl set image deployment/monolith monolith=gcr.io/${GOOGLE_CLOUD_PROJECT}/monolith:3.0.1
+
+5. Migrate Frotnend to microservices
+
+cd ~/monolith-to-microservices/react-app
+cp .env.monolith .env
+npm run build
+
+cd ~/monolith-to-microservices/microservices/src/frontend
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/frontend:1.0.0 .
+
+kubectl create deployment frontend --image=gcr.io/${GOOGLE_CLOUD_PROJECT}/frontend:1.0.0
+
+kubectl expose deployment frontend --type=LoadBalancer --port 80 --target-port 8080
+
+#Delete the monolith
+kubectl delete deployment monolith
+kubectl delete service monolith
+
+kubectl get services
+
+
+
+gcloud beta container --project "cloudonboard-gke" clusters create "fancy-cluster" --zone "asia-southeast2-b" --no-enable-basic-auth --cluster-version "1.19.9-gke.1900" --release-channel "regular" --machine-type "e2-medium" --image-type "COS_CONTAINERD" --disk-type "pd-standard" --disk-size "100" --metadata disable-legacy-endpoints=true --scopes "https://www.googleapis.com/auth/cloud-platform" --max-pods-per-node "110" --num-nodes "3" --enable-stackdriver-kubernetes --enable-ip-alias --network "projects/cloudonboard-gke/global/networks/default" --subnetwork "projects/cloudonboard-gke/regions/asia-southeast2/subnetworks/jakarta-region" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --enable-shielded-nodes --node-locations "asia-southeast2-b"

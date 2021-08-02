@@ -1,0 +1,51 @@
+Linux
+curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh
+sudo bash add-monitoring-agent-repo.sh --also-install
+sudo service stackdriver-agent start
+sudo service stackdriver-agent status
+sudo grep collectd /var/log/{syslog,messages} | tail
+sudo apt-cache madison stackdriver-agent
+
+
+
+Windows - via powershell
+(New-Object Net.WebClient).DownloadFile("https://repo.stackdriver.com/windows/StackdriverMonitoring-GCM-46.exe", "${env:UserProfile}\StackdriverMonitoring-GCM-46.exe")
+& "${env:UserProfile}\StackdriverMonitoring-GCM-46.exe"
+
+& "${env:UserProfile}\StackdriverMonitoring-GCM-46.exe" /S
+
+Create Policy
+
+gcloud components install beta
+
+sudo apt-get install google-cloud-sdk
+gcloud components list
+
+gcloud beta compute instances \
+    ops-agents policies create ops-agents-policy-safe-rollout \
+    --agent-rules="type=logging,version=current-major,package-state=installed,enable-autoupgrade=true;type=metrics,version=current-major,package-state=installed,enable-autoupgrade=true" \
+    --os-types=short-name=centos,version=7 \
+    --group-labels=env=test,app=myproduct
+
+gcloud beta compute instances \
+    ops-agents policies update ops-agents-policy-safe-rollout \
+    --group-labels=os=linux \
+    --zones=asia-southeast2-b
+
+    gcloud beta compute instances \
+    ops-agents policies update ops-agents-policy-safe-rollout \
+    --zones=asia-southeast2-b
+
+    Scrpt to Enable Permision and Set the 
+
+    curl -l https://cloud.google.com/stackdriver/docs/set-permissions.sh > set-permissions.sh
+
+    gcloud config set project alfamart-spokeproject-a
+
+    bash set-permissions.sh --project=alfamart-spokeproject-a \
+      --iam-user=admin@sindra.altostrat.com \
+      --iam-permission-role=guestPolicyAdmin 
+
+    gcloud beta compute instances \
+    ops-agents policies update ops-agents-policy-safe-rollout \
+    --clear-zones
