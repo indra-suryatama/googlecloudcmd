@@ -1,0 +1,80 @@
+meta {
+  title "Bluebird DR Solution"
+}
+
+elements {
+  gcp {
+      group vpc {
+        name "DefaultVPC"  
+        card vpn as CloudVPN
+
+        group subnetAPP {
+        name "Application Subnet"
+            
+            card gce as CVM1{display_name "App1 "}
+            card gcs as CVM1Disk{display_name "Disk"}  
+ 
+            card gce as CVMn{display_name "Appn "}
+            card gcs as CVMnDisk{display_name "Disk"} 
+        }
+        
+        group subnetDB {
+        name "Database Subnet"
+            card gce as CDB1{display_name "Database1"}
+            card gcs as CDB1Disk{display_name "Disk"}  
+ 
+            card gce as CDBn{display_name "Database3"}
+            card gcs as CDBnDisk{display_name "Disk"}  
+     
+        }
+      }
+  }
+  
+  group OnPremise {
+      name "OnPremise"
+      background_color "#ece1e1"
+     
+      card OnPremVPN {
+        display_name "OnPrem Router"
+      	icon_url "https://drive.google.com/file/d/1Jf7Nip8Gb2ktgXWJ8OQjEa1o8DE2ag0v/view"
+      }
+
+      group Application {
+        name "Application"
+        card gce as VM1{display_name "App1 "}
+        card gcs as VM1Disk{display_name "Disk"}
+
+        card gce as VMn{display_name "Appn "}
+        card gcs as VMnDisk{display_name "Disk"}
+
+      }
+
+      group Databases {
+        name "Database"
+
+        card gce as DB1{display_name "Database1 "}
+        card gcs as DB1disk{display_name "Disk"}
+
+        card gce as DBn{display_name "Databasen "}
+        card gcs as DBnDisk{display_name "Disk"}
+      }
+    }
+    
+    
+}
+
+paths {
+  OnPremVPN --> CloudVPN
+  VM1 -- VM1Disk
+
+  VMn -- VMnDisk
+  DB1 -- DB1disk
+
+  DBn -- DBnDisk
+  CVM1 -- CVM1Disk
+
+  CVMn -- CVMnDisk
+  CDB1 -- CDB1Disk
+
+  CDBn -- CDBnDisk
+ }
