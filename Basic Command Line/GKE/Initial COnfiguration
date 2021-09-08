@@ -1,0 +1,6 @@
+kubectl get pods
+kubectl get services
+
+
+git clone https://github.com/GoogleCloudPlatform/kubernetes-engine-samples
+cd kubernetes-engine-samples/hello-app

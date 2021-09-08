@@ -1,0 +1,24 @@
+sudo apt install nfs-common
+sudo mkdir /var/backups
+sudo mount -t nfs 10.10.0.10:/backups /var/backups
+df -h
+
+
+sudo nano /etc/fstab
+
+add line
+# <file system>     <dir>       <type>   <options>   <dump>	<pass>
+10.10.0.10:/backups /var/backups  nfs      defaults    0       0
+
+mount /var/backups
+mount 10.10.0.10:/backups
+
+
+unmounting
+umount /var/backups
+
+fallocate -l 10G gentoo_root.img
+
+truncate -s 10M output.file
+
+sudo wget link
